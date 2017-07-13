@@ -1,0 +1,2 @@
+# User Authentication With Express and Mongo
+Bookworm is a fictional site that I set up to demonstrate my knowledge of user authentication. The technologies I used for this project are Pug for templating, CSS for styling, Express.js for handling user authentication, and Mongoose for interfacing with the data storage layer (MongoDB).
