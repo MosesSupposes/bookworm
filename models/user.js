@@ -11,7 +11,7 @@ var UserSchema = new mongoose.Schema({
         required: true,
         trim: true
     }, 
-    favoriteBook {
+    favoriteBook: {
         type: String,
         required: true,
         trim: true
