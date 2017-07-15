@@ -7,15 +7,6 @@ router.get('/', (req, res, next) => {
     return res.render('index', { title: 'Home' });
 });
 
-// GET /login
-router.get('/login', (req, res, next) => {
-    return res.render('login', { title: 'Log In' });
-});
-
-// POST /login
-router.post('/login', (req, res, next) => {
-    return res.send('Logged In!');
-});
 
 // GET /register
 router.get('/register', (req, res, next) => {
@@ -45,8 +36,12 @@ router.post('/register', (req, res, next) => {
 
             // insert document into Mongo
             User.create(userData, (error, user) => {
-                if (error) return next(error);
-                else return res.redirect('/profile');
+                if (error) {
+                    return next(error);
+                } else {
+                    req.session.userId = user._id;
+                    return res.redirect('/profile');    
+                } 
             });
 
     } else {
@@ -54,6 +49,47 @@ router.post('/register', (req, res, next) => {
         err.status = 400;
         return next(err);
     }
+});
+
+// GET /login
+router.get('/login', (req, res, next) => {
+    return res.render('login', { title: 'Log In' });
+});
+
+// POST /login
+router.post('/login', (req, res, next) => {
+    if (req.body.email && req.body.password) {
+        User.authenticate(req,body.email, req.body.password, (error, user) => {
+            if (error || !user) {
+                let err = new Error('Incorrect email or password.');
+                err.status = 401;
+                return next(err)
+            } else {
+                req.session.userId = user._id;
+                return res.redirect('/profile');
+            }
+        });
+    } else {
+        let err = new Error('Email and password are required.');
+        err.status = 401;
+        return next(err);
+    }
+});
+
+// GET /profile
+router.get('/profile', (req, res, next) => {
+    if (!req.session.userId) {
+        let err = new Error('You are authorized to view this page');
+        err.status = 403;
+        return next(err);
+    } 
+    User.findById(req.session.userId)
+        .exec((error, user) => {
+            if (error) 
+                return next(error)
+            else 
+                return res.render('profile', { title: 'Profile', name: user.name, favorite: user.favoriteBook });                
+        });
 });
 
 // GET /about
