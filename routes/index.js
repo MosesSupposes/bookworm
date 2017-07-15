@@ -7,6 +7,16 @@ router.get('/', (req, res, next) => {
     return res.render('index', { title: 'Home' });
 });
 
+// GET /login
+router.get('/login', (req, res, next) => {
+    return res.render('login', { title: 'Log In' });
+});
+
+// POST /login
+router.post('/login', (req, res, next) => {
+    return res.send('Logged In!');
+});
+
 // GET /register
 router.get('/register', (req, res, next) => {
     return res.render('register', { title: 'Sign Up' });
