@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var User = require('../models/user');
+var mid = require('../middleware');
 
 // GET /
 router.get('/', (req, res, next) => {
@@ -9,7 +10,7 @@ router.get('/', (req, res, next) => {
 
 
 // GET /register
-router.get('/register', (req, res, next) => {
+router.get('/register', mid.loggedOut, (req, res, next) => {
     return res.render('register', { title: 'Sign Up' });
 });
 
@@ -52,7 +53,7 @@ router.post('/register', (req, res, next) => {
 });
 
 // GET /login
-router.get('/login', (req, res, next) => {
+router.get('/login', mid.loggedOut, (req, res, next) => {
     return res.render('login', { title: 'Log In' });
 });
 
@@ -76,13 +77,22 @@ router.post('/login', (req, res, next) => {
     }
 });
 
+// GET /logout 
+router.get('/logout', (req, res, next) => {
+    if (req.session) {
+        // delete session object
+        req.session.destroy((err) => {
+            if (err) {
+                return next(err)
+            } else {
+                return res.redirect('/');
+            }
+        });
+    }
+});
+
 // GET /profile
-router.get('/profile', (req, res, next) => {
-    if (!req.session.userId) {
-        let err = new Error('You are authorized to view this page');
-        err.status = 403;
-        return next(err);
-    } 
+router.get('/profile', mid.requiresLogin, (req, res, next) => {
     User.findById(req.session.userId)
         .exec((error, user) => {
             if (error) 
